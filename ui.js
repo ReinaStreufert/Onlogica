@@ -206,6 +206,8 @@
 	document.body.onload = function() {
 		window.ui.selectbutton = document.getElementById("ui-select");
 		window.ui.panbutton = document.getElementById("ui-pan");
+		window.ui.infobox = document.getElementById("ui-infobox");
+		window.ui.closeinfobox = document.getElementById("ui-closeinfobox");
 		ui.selectbutton.addEventListener("click", function() {
 			window.ui.currentTool = "select";
 			setButtonState(ui.selectbutton, true);
@@ -215,6 +217,18 @@
 			window.ui.currentTool = "pan";
 			setButtonState(ui.selectbutton, false);
 			setButtonState(ui.panbutton, true);
+		});
+		ui.closeinfobox.addEventListener("click", function() {
+			ui.infobox.style.right = "-325px";
+		});
+		let canvas = document.getElementById("canvas");
+		canvas.width = canvas.clientWidth;
+		canvas.height = canvas.clientHeight;
+
+		window.addEventListener("resize", function(e) {
+			canvas.width = canvas.clientWidth;
+			canvas.height = 0;
+			canvas.height = canvas.clientHeight;
 		});
 
 		document.body.addEventListener("keydown", function(e) {
