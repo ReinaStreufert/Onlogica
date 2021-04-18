@@ -141,13 +141,14 @@
 	}
 
 	window.draggable = {};
-	draggable.new = function(element) {
+	draggable.new = function(element, callback) {
 		let draggableObject = {};
 		draggableObject.dragState = 0;
 		draggableObject.offsetX = 0;
 		draggableObject.offsetY = 0;
 		draggableObject.el = element;
 		draggableObject.clone = null;
+		draggableObject.callback = callback;
 		element.addEventListener("mousedown", function(e) {
 			draggableObject.dragState = 1;
 			let rect = draggableObject.el.getBoundingClientRect();
@@ -160,6 +161,9 @@
 				if (draggableObject.dragState == 2) {
 					draggableObject.clone.style.animation = "opacityfadeout 0.5s ease";
 					draggableObject.clone.style.opacity = 0;
+					if (draggableObject.callback) {
+						draggableObject.callback((e.clientX - draggableObject.offsetX) + draggableObject.el.clientWidth / 2, (e.clientY - draggableObject.offsetY) + draggableObject.el.clientHeight / 2);
+					}
 					window.setTimeout(function() {
 						draggableObject.clone.remove();
 						draggableObject.clone = null;
@@ -203,68 +207,101 @@
 		}
 	};
 
-	document.body.onload = function() {
-		window.ui.selectbutton = document.getElementById("ui-select");
-		window.ui.panbutton = document.getElementById("ui-pan");
-		window.ui.infobox = document.getElementById("ui-infobox");
-		window.ui.closeinfobox = document.getElementById("ui-closeinfobox");
-		ui.selectbutton.addEventListener("click", function() {
+	window.ui.selectbutton = document.getElementById("ui-select");
+	window.ui.panbutton = document.getElementById("ui-pan");
+	window.ui.infobox = document.getElementById("ui-infobox");
+	window.ui.closeinfobox = document.getElementById("ui-closeinfobox");
+	window.ui.expandinfobox = document.getElementById("ui-expandinfobox");
+	ui.selectbutton.addEventListener("click", function() {
+		window.ui.currentTool = "select";
+		setButtonState(ui.selectbutton, true);
+		setButtonState(ui.panbutton, false);
+	});
+	ui.panbutton.addEventListener("click", function() {
+		window.ui.currentTool = "pan";
+		setButtonState(ui.selectbutton, false);
+		setButtonState(ui.panbutton, true);
+	});
+	ui.closeinfobox.addEventListener("click", function() {
+		ui.infobox.style.right = "-325px";
+		ui.expandinfobox.style.right = "-50px";
+	});
+	ui.expandinfobox.addEventListener("click", function() {
+		ui.infobox.style.right = "40px";
+		ui.expandinfobox.style.right = "-150px";
+	});
+	let canvas = document.getElementById("canvas");
+	canvas.width = canvas.clientWidth * 2;
+	canvas.height = canvas.clientHeight * 2;
+
+	window.addEventListener("resize", function(e) {
+		canvas.width = canvas.clientWidth * 2;
+		canvas.height = 0;
+		canvas.height = canvas.clientHeight * 2;
+		requestAnimationFrame(workspace.draw);
+	});
+
+	document.body.addEventListener("keydown", function(e) {
+		if (event.code == "KeyS") {
 			window.ui.currentTool = "select";
 			setButtonState(ui.selectbutton, true);
 			setButtonState(ui.panbutton, false);
-		});
-		ui.panbutton.addEventListener("click", function() {
+		} else if (event.code == "KeyP") {
 			window.ui.currentTool = "pan";
 			setButtonState(ui.selectbutton, false);
 			setButtonState(ui.panbutton, true);
-		});
-		ui.closeinfobox.addEventListener("click", function() {
-			ui.infobox.style.right = "-325px";
-		});
-		let canvas = document.getElementById("canvas");
-		canvas.width = canvas.clientWidth;
-		canvas.height = canvas.clientHeight;
+		}
+	});
 
-		window.addEventListener("resize", function(e) {
-			canvas.width = canvas.clientWidth;
-			canvas.height = 0;
-			canvas.height = canvas.clientHeight;
-		});
+	let dropgate = function(x, y, gatetype) {
+		let canvasRect = workspace.canvas.getBoundingClientRect();
+		x = x - canvasRect.x;
+		y = y - canvasRect.y;
+		if (x >= 0 && y >= 0) {
+			let graphPoint = workspace.displayPointToGraphPoint(x, y);
+			let andgate = gatetype.new();
+			andgate.x = graphPoint.x;
+			andgate.y = graphPoint.y;
+			workspace.currentgraph.objects.push(andgate);
+			requestAnimationFrame(workspace.draw);
+		}
+	}
 
-		document.body.addEventListener("keydown", function(e) {
-			if (event.code == "KeyS") {
-				window.ui.currentTool = "select";
-				setButtonState(ui.selectbutton, true);
-				setButtonState(ui.panbutton, false);
-			} else if (event.code == "KeyP") {
-				window.ui.currentTool = "pan";
-				setButtonState(ui.selectbutton, false);
-				setButtonState(ui.panbutton, true);
-			}
-		});
+	window.ui.andDraggable = draggable.new(document.getElementById("ui-and"), function(x, y) {
+		dropgate(x, y, logic.andgate);
+	});
+	window.ui.orDraggable = draggable.new(document.getElementById("ui-or"), function(x, y) {
+		dropgate(x, y, logic.orgate);
+	});
+	window.ui.xorDraggable = draggable.new(document.getElementById("ui-xor"), function(x, y) {
+		dropgate(x, y, logic.xorgate);
+	});
+	window.ui.notDraggable = draggable.new(document.getElementById("ui-not"), function(x, y) {
+		dropgate(x, y, logic.notgate);
+	});
+	window.ui.nandDraggable = draggable.new(document.getElementById("ui-nand"), function(x, y) {
+		dropgate(x, y, logic.nandgate);
+	});
+	window.ui.norDraggable = draggable.new(document.getElementById("ui-nor"), function(x, y) {
+		dropgate(x, y, logic.norgate);
+	});
+	window.ui.xnorDraggable = draggable.new(document.getElementById("ui-xnor"), function(x, y) {
+		dropgate(x, y, logic.xnorgate);
+	});
 
-		window.ui.andDraggable = draggable.new(document.getElementById("ui-and"));
-		window.ui.orDraggable = draggable.new(document.getElementById("ui-or"));
-		window.ui.xorDraggable = draggable.new(document.getElementById("ui-xor"));
-		window.ui.notDraggable = draggable.new(document.getElementById("ui-not"));
-		window.ui.nandDraggable = draggable.new(document.getElementById("ui-nand"));
-		window.ui.norDraggable = draggable.new(document.getElementById("ui-nor"));
-		window.ui.xnorDraggable = draggable.new(document.getElementById("ui-xnor"));
+	window.ui.onDraggable = draggable.new(document.getElementById("ui-on"));
+	window.ui.offDraggable = draggable.new(document.getElementById("ui-off"));
+	window.ui.switchDraggable = draggable.new(document.getElementById("ui-switch"));
+	window.ui.clockDraggable = draggable.new(document.getElementById("ui-clock"));
 
-		window.ui.onDraggable = draggable.new(document.getElementById("ui-on"));
-		window.ui.offDraggable = draggable.new(document.getElementById("ui-off"));
-		window.ui.switchDraggable = draggable.new(document.getElementById("ui-switch"));
-		window.ui.clockDraggable = draggable.new(document.getElementById("ui-clock"));
+	window.ui.lightDraggable = draggable.new(document.getElementById("ui-light"));
+	window.ui.sevensegDraggable = draggable.new(document.getElementById("ui-7seg"));
 
-		window.ui.lightDraggable = draggable.new(document.getElementById("ui-light"));
-		window.ui.sevensegDraggable = draggable.new(document.getElementById("ui-7seg"));
+	window.ui.editingDropdown = dropdown.new(document.getElementById("editingDropdown"), ["Main graph", "New user-defined block..."], 0);
+	ui.editingDropdown.SetAction(1, function() {});
 
-		window.ui.editingDropdown = dropdown.new(document.getElementById("editingDropdown"), ["Main graph", "New user-defined block..."], 0);
-		ui.editingDropdown.SetAction(1, function() {});
-
-		window.ui.bookmarksDropdown = dropdown.new(document.getElementById("bookmarksDropdown"), ["Origin", "New bookmark..."], -1);
-		ui.bookmarksDropdown.OverrideText("Bookmarks...");
-		ui.bookmarksDropdown.SetAction(0, function() {});
-		ui.bookmarksDropdown.SetAction(1, function() {});
-	};
+	window.ui.bookmarksDropdown = dropdown.new(document.getElementById("bookmarksDropdown"), ["Origin", "New bookmark..."], -1);
+	ui.bookmarksDropdown.OverrideText("Bookmarks...");
+	ui.bookmarksDropdown.SetAction(0, function() {});
+	ui.bookmarksDropdown.SetAction(1, function() {});
 })();

@@ -329,6 +329,7 @@ canvas {
 	transition-timing-function: ease-in;
 	transition-duration: 0.3s;
 	transition-property: right;
+	border-radius: 15px;
 }
 .infobox svg {
 	width: 24px;
@@ -342,6 +343,31 @@ canvas {
 }
 .infobox svg:hover {
 	color: darkred;
+}
+.infoboxexpandbutton {
+	position: absolute;
+	z-index: 5;
+	bottom: 40px;
+	right: -150px;
+	width: 100px;
+	height: 50px;
+	border-radius: 50px;
+	background-color: white;
+	box-shadow: 0px 0px 15px 5px rgba(0,0,0,0.37);
+	transition-timing-function: ease-in;
+	transition-duration: 0.3s;
+	transition-property: right;
+}
+.infoboxexpandbutton svg {
+	width: 50%;
+	margin-right: 50px;
+	height: 100%;
+	transition-timing-function: ease-out;
+	transition-duration: 0.2s;
+	transition-property: color;
+}
+.infoboxexpandbutton:hover svg {
+	color: purple;
 }
 .bindings {
 	display: flex;
