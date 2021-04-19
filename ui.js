@@ -1,6 +1,5 @@
 (function() {
 	window.ui = {};
-	window.ui.currentTool = "select";
 
 	window.dropdown = {};
 	dropdown.new = function(root, items, selectedItemIndex) {
@@ -213,12 +212,12 @@
 	window.ui.closeinfobox = document.getElementById("ui-closeinfobox");
 	window.ui.expandinfobox = document.getElementById("ui-expandinfobox");
 	ui.selectbutton.addEventListener("click", function() {
-		window.ui.currentTool = "select";
+		tools.select.switch();
 		setButtonState(ui.selectbutton, true);
 		setButtonState(ui.panbutton, false);
 	});
 	ui.panbutton.addEventListener("click", function() {
-		window.ui.currentTool = "pan";
+		tools.pan.switch();
 		setButtonState(ui.selectbutton, false);
 		setButtonState(ui.panbutton, true);
 	});
@@ -243,11 +242,11 @@
 
 	document.body.addEventListener("keydown", function(e) {
 		if (event.code == "KeyS") {
-			window.ui.currentTool = "select";
+			tools.select.switch();
 			setButtonState(ui.selectbutton, true);
 			setButtonState(ui.panbutton, false);
 		} else if (event.code == "KeyP") {
-			window.ui.currentTool = "pan";
+			tools.pan.switch();
 			setButtonState(ui.selectbutton, false);
 			setButtonState(ui.panbutton, true);
 		}
@@ -263,7 +262,7 @@
 			andgate.x = graphPoint.x;
 			andgate.y = graphPoint.y;
 			workspace.currentgraph.objects.push(andgate);
-			requestAnimationFrame(workspace.draw);
+			workspace.redraw();
 		}
 	}
 

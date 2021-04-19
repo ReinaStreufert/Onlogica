@@ -60,8 +60,8 @@
   workspace.displayPointToGraphPoint = function(x, y) {
     let centeredX = (x * 2) - canvas.width / 2;
     let centeredY = (y * 2) - canvas.height / 2;
-    let graphX = (centeredX + workspace.maingraph.x) / workspace.currentgraph.scale;
-    let graphY = (centeredY + workspace.maingraph.y) / workspace.currentgraph.scale;
+    let graphX = (centeredX / workspace.currentgraph.scale) + workspace.currentgraph.x;
+    let graphY = (centeredY / workspace.currentgraph.scale) + workspace.currentgraph.y;
     return {x: graphX, y: graphY};
   };
   workspace.onDisplay = function(x, y, width, height, outDisplayPoint) {
@@ -78,5 +78,8 @@
     } else {
       return true;
     }
+  };
+  workspace.redraw = function() {
+    requestAnimationFrame(workspace.draw);
   };
 })();
