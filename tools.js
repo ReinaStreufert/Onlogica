@@ -55,7 +55,7 @@
     currentdrag.startY = y;
     tools.currenttool.drag(currentdrag.startX, currentdrag.startY, x, y, workspace.currentgraph);
   });
-  workspace.canvas.addEventListener("mousemove", function(e) {
+  window.addEventListener("mousemove", function(e) {
     if (currentdrag.dragging) {
       let canvasRect = workspace.canvas.getBoundingClientRect();
       let x = (e.clientX - canvasRect.x) / (workspace.currentgraph.scale / 2);
@@ -64,7 +64,7 @@
       tools.currenttool.drag(currentdrag.startX, currentdrag.startY, x, y, workspace.currentgraph);
     }
   });
-  workspace.canvas.addEventListener("mouseup", function(e) {
+  window.addEventListener("mouseup", function(e) {
     if (currentdrag.dragging) {
       currentdrag.dragging = false;
       tools.currenttool.enddrag();
