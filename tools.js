@@ -25,6 +25,21 @@
   pan.enddrag = function() {
     pan.active = false;
   };
+	workspace.canvas.addEventListener("wheel", function(e) {
+		e.preventDefault();
+
+		let wheel = e.deltaY < 0 ? 1 : -1;
+		let canvasRect = workspace.canvas.getBoundingClientRect();
+		let x = ((e.clientX - canvasRect.x) * 2) - workspace.canvas.width / 2;
+		let y = ((e.clientY - canvasRect.y) * 2) - workspace.canvas.height / 2;
+		let zoom = Math.exp(wheel * 0.2);
+
+		workspace.currentgraph.x -= x / (workspace.currentgraph.scale * zoom) - x / workspace.currentgraph.scale;
+		workspace.currentgraph.y -= y / (workspace.currentgraph.scale * zoom) - y / workspace.currentgraph.scale;
+		workspace.currentgraph.scale = workspace.currentgraph.scale * zoom;
+
+		workspace.redraw();
+	});
 
   tools.select = {};
   let select = tools.select;
