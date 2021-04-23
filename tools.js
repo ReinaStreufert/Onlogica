@@ -3,19 +3,28 @@
 
   tools.pan = {};
   let pan = tools.pan;
-  pan.startWorkspaceX = 0;
-  pan.startWorkspaceY = 0;
+  pan.lastX = 0;
+  pan.lastY = 0;
   pan.active = false;
   pan.drag = function(startX, startY, x, y, graph) {
     if (!pan.active) {
-      pan.startWorkspaceX = graph.x;
-      pan.startWorkspaceY = graph.y;
+      pan.lastX = x;
+      pan.lastY = y;
       pan.active = true;
     }
-    let difX = x - startX;
-    let difY = y - startY;
-    graph.x = pan.startWorkspaceX - difX;
-    graph.y = pan.startWorkspaceY - difY;
+
+		let zoomedX = x / (graph.scale / 2);
+		let zoomedY = y / (graph.scale / 2);
+		let zoomedLastX = pan.lastX / (graph.scale / 2);
+		let zoomedLastY = pan.lastY / (graph.scale / 2);
+
+    let difX = zoomedX - zoomedLastX;
+    let difY = zoomedY - zoomedLastY;
+    graph.x = graph.x - difX;
+    graph.y = graph.y - difY;
+
+		pan.lastX = x;
+		pan.lastY = y;
     workspace.redraw();
   };
   pan.switch = function() {
@@ -33,6 +42,9 @@
 		let x = ((e.clientX - canvasRect.x) * 2) - workspace.canvas.width / 2;
 		let y = ((e.clientY - canvasRect.y) * 2) - workspace.canvas.height / 2;
 		let zoom = Math.exp(wheel * 0.2);
+		if (workspace.currentgraph.scale * zoom < 2) {
+			return;
+		}
 
 		workspace.currentgraph.x -= x / (workspace.currentgraph.scale * zoom) - x / workspace.currentgraph.scale;
 		workspace.currentgraph.y -= y / (workspace.currentgraph.scale * zoom) - y / workspace.currentgraph.scale;
@@ -64,8 +76,8 @@
   workspace.canvas.addEventListener("mousedown", function(e) {
     currentdrag.dragging = true;
     let canvasRect = workspace.canvas.getBoundingClientRect();
-    let x = (e.clientX - canvasRect.x) / (workspace.currentgraph.scale / 2);
-    let y = (e.clientY - canvasRect.y) / (workspace.currentgraph.scale / 2);
+    let x = (e.clientX - canvasRect.x)
+    let y = (e.clientY - canvasRect.y);
     currentdrag.startX = x;
     currentdrag.startY = y;
     tools.currenttool.drag(currentdrag.startX, currentdrag.startY, x, y, workspace.currentgraph);
@@ -73,8 +85,8 @@
   window.addEventListener("mousemove", function(e) {
     if (currentdrag.dragging) {
       let canvasRect = workspace.canvas.getBoundingClientRect();
-      let x = (e.clientX - canvasRect.x) / (workspace.currentgraph.scale / 2);
-      let y = (e.clientY - canvasRect.y) / (workspace.currentgraph.scale / 2);
+      let x = (e.clientX - canvasRect.x);
+      let y = (e.clientY - canvasRect.y);
       //console.log(x + " " + y);
       tools.currenttool.drag(currentdrag.startX, currentdrag.startY, x, y, workspace.currentgraph);
     }

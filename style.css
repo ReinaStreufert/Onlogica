@@ -22,26 +22,31 @@ body {
 	padding: 0px;
 	display: -ms-grid;
 	display: grid;
-	grid-template-rows: 1fr;
-	grid-template-columns: 325px 1fr;
-	-ms-grid-rows: 100px 1fr;
-	-ms-grid-columns: 325px 1fr;
 	width: 100vw;
 	height: 100vh;
 	overflow: hidden;
 }
+.body-dockleft {
+	grid-template-rows: 1fr;
+	grid-template-columns: 325px 1fr;
+}
+.body-dockright {
+	grid-template-rows: 1fr;
+	grid-template-columns: 1fr 325px;
+}
 .logicpicker {
 	z-index: 2;
 	box-shadow: 0px 0px 15px 5px rgba(0,0,0,0.37);
-	-ms-grid-row: 1;
-	-ms-grid-row-span: 2;
 	grid-row: 1 / 2;
-	-ms-grid-column: 1;
-	-ms-grid-column-span: 1;
-	grid-column: 1 / 2;
 	background-color: #EEEEEE;
 	padding: 25px;
 	overflow-y: scroll;
+}
+.logicpicker-dockleft {
+	grid-column: 1 / 2;
+}
+.logicpicker-dockright {
+	grid-column: 2 / 2;
 }
 .workspace {
 	z-index: 0;
@@ -119,10 +124,15 @@ svg {
 }
 
 .content {
-	grid-row-start: 1;
-	grid-column: 2 / 3;
 	display: flex;
 	flex-direction: column;
+	grid-row-start: 1;
+}
+.content-dockleft {
+	grid-column: 2 / 2;
+}
+.content-dockright {
+	grid-column: 1 / 2;
 }
 
 .controls {
@@ -181,6 +191,9 @@ canvas {
 	margin-right: 3px;
 	position: relative;
 	padding: 5px;
+}
+.controlbutton-selected {
+	background-color: lightblue;
 }
 .controlbutton:hover {
 	border: 1px solid #CCC;
@@ -308,14 +321,6 @@ canvas {
 .dropdownitem:hover {
 	background-color: lightblue;
 }
-.hidden {
-	visibility: hidden;
-	width: 0px;
-	height: 0px;
-	margin: 0px;
-	padding: 0px;
-	border: none;
-}
 .infobox {
 	width: 300px;
 	height: min-content;
@@ -400,6 +405,14 @@ canvas {
 	font-size: 10pt;
 	text-align: center;
 	margin-left: -1px;
+}
+.hidden {
+	visibility: hidden !important;
+	width: 0px !important;
+	height: 0px !important;
+	margin: 0px !important;
+	padding: 0px !important;
+	border: none !important;
 }
 
 @keyframes dropdownexpand {

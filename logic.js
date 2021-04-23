@@ -21,6 +21,7 @@
 			input.relativeX = 0;
 			input.relativeY = 0;
 			input.parent = gate;
+			input.occupied = false;
 			gate.inputs.push(input);
 		}
 		gate.outputs = [];
@@ -83,7 +84,10 @@
 	let twoinputgate = logic.abstract.twoinputgate;
 	twoinputgate.new = function(operation) {
 		let gate = logic.abstract.gate.new(2, 1);
+		gate.inputs[0].relativeY = 16 / 4;
+		gate.inputs[1].relativeY = -16 / 4;
 		gate.output = gate.outputs[0];
+		gate.output.relativeY = 0;
 		gate.update = function() {
 			let newOutput = operation(gate.inputs[0].uncommitedvalues[0], gate.inputs[1].uncommitedvalues[0]);
 			for (let i = 0; i < gate.output.destinations.length; i++) {
@@ -118,6 +122,9 @@
 			return (input1val && input2val);
 		});
 		gate.static = andgate.static;
+		gate.inputs[0].relativeX = -20 / 2;
+		gate.inputs[1].relativeX = -20 / 2;
+		gate.outputs[0].relativeX = 20 / 2;
 		// TODO: icon, input and output display offsets
 		return gate;
 	};

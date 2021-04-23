@@ -1,5 +1,6 @@
 (function() {
 	window.ui = {};
+	ui.dockside = "left";
 
 	window.dropdown = {};
 	dropdown.new = function(root, items, selectedItemIndex) {
@@ -155,7 +156,7 @@
 			draggableObject.offsetY = e.clientY - rect.y;
 			e.preventDefault();
 		});
-		document.body.addEventListener("mouseup", function(e) {
+		window.addEventListener("mouseup", function(e) {
 			if (draggableObject.dragState > 0) {
 				if (draggableObject.dragState == 2) {
 					draggableObject.clone.style.animation = "opacityfadeout 0.5s ease";
@@ -172,7 +173,7 @@
 				e.preventDefault();
 			}
 		});
-		document.body.addEventListener("mousemove", function(e) {
+		window.addEventListener("mousemove", function(e) {
 			if (draggableObject.dragState > 0) {
 				if (draggableObject.dragState == 1) {
 					draggableObject.clone = draggableObject.el.cloneNode(true);
@@ -206,11 +207,25 @@
 		}
 	};
 
+	let setControlButtonState = function(button, selected) {
+		if (selected) {
+			button.classList.add("controlbutton-selected");
+		} else {
+			button.classList.remove("controlbutton-selected");
+		}
+	}
+
 	window.ui.selectbutton = document.getElementById("ui-select");
 	window.ui.panbutton = document.getElementById("ui-pan");
 	window.ui.infobox = document.getElementById("ui-infobox");
 	window.ui.closeinfobox = document.getElementById("ui-closeinfobox");
 	window.ui.expandinfobox = document.getElementById("ui-expandinfobox");
+	window.ui.gridtoggle = document.getElementById("ui-gridtoggle");
+	window.ui.content = document.getElementById("ui-content");
+	window.ui.logicpicker = document.getElementById("ui-logicpicker");
+	window.ui.docksidebutton = document.getElementById("ui-dockside");
+	window.ui.docklefticon = document.getElementById("ui-docklefticon");
+	window.ui.dockrighticon = document.getElementById("ui-dockrighticon")
 	ui.selectbutton.addEventListener("click", function() {
 		tools.select.switch();
 		setButtonState(ui.selectbutton, true);
@@ -229,15 +244,36 @@
 		ui.infobox.style.right = "40px";
 		ui.expandinfobox.style.right = "-150px";
 	});
-	let canvas = document.getElementById("canvas");
-	canvas.width = canvas.clientWidth * 2;
-	canvas.height = canvas.clientHeight * 2;
+	ui.gridtoggle.addEventListener("click", function() {
+		if (workspace.gridEnabled) {
+			setControlButtonState(ui.gridtoggle, false);
+			workspace.gridEnabled = false;
+		} else {
+			setControlButtonState(ui.gridtoggle, true);
+			workspace.gridEnabled = true;
+		}
+		workspace.redraw();
+	});
+	ui.docksidebutton.addEventListener("click", function() {
+		document.body.classList.toggle("body-dockleft");
+		document.body.classList.toggle("body-dockright");
+		ui.content.classList.toggle("content-dockleft");
+		ui.content.classList.toggle("content-dockright");
+		ui.logicpicker.classList.toggle("content-dockleft");
+		ui.logicpicker.classList.toggle("logicpicker-dockright");
+		ui.docklefticon.classList.toggle("hidden");
+		ui.dockrighticon.classList.toggle("hidden");
+		if (ui.dockside == "left") {
+			ui.dockside = "right";
+		} else {
+			ui.dockside = "left";
+		}
+	});
+	//let canvas = document.getElementById("canvas");
+	workspace.resize();
 
 	window.addEventListener("resize", function(e) {
-		canvas.width = canvas.clientWidth * 2;
-		canvas.height = 0;
-		canvas.height = canvas.clientHeight * 2;
-		requestAnimationFrame(workspace.draw);
+		workspace.resize();
 	});
 
 	document.body.addEventListener("keydown", function(e) {
@@ -296,7 +332,7 @@
 	window.ui.lightDraggable = draggable.new(document.getElementById("ui-light"));
 	window.ui.sevensegDraggable = draggable.new(document.getElementById("ui-7seg"));
 
-	window.ui.editingDropdown = dropdown.new(document.getElementById("editingDropdown"), ["Main graph", "New user-defined block..."], 0);
+	window.ui.editingDropdown = dropdown.new(document.getElementById("editingDropdown"), ["Main graph", "New user-defined component..."], 0);
 	ui.editingDropdown.SetAction(1, function() {});
 
 	window.ui.bookmarksDropdown = dropdown.new(document.getElementById("bookmarksDropdown"), ["Origin", "New bookmark..."], -1);

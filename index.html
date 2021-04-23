@@ -4,8 +4,8 @@
 		<link rel="preconnect" href="https://fonts.gstatic.com">
 		<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;800&display=swap" rel="stylesheet">
 	</head>
-	<body>
-		<div class="logicpicker">
+	<body class="body-dockleft">
+		<div class="logicpicker logicpicker-dockleft" id="ui-logicpicker">
 			<p class="heading">Tools</p>
 			<div class="iconlist">
 				<div class="iconitem iconitem-selected" id="ui-select">
@@ -141,9 +141,9 @@
 			<p class="heading">User-defined</p>
 			<div class="iconlist hidden">
 			</div>
-			<p>You have no user-defined logic graphs.</p>
+			<p>You have no user-defined components.</p>
 		</div>
-		<div class="content">
+		<div class="content content-dockleft" id="ui-content">
 			<div class="controls">
 				<div class="controlsection">
 					<div class="topcontrolcontent">
@@ -196,6 +196,26 @@
 				</div>
 				<div class="controlsection">
 					<div class="topcontrolcontent">
+						<p class="smallheading">View</p>
+					</div>
+					<div class="bottomcontrolcontent">
+						<div class="controlbutton" id="ui-gridtoggle">
+							<svg viewBox="0 0 24 24">
+							    <path fill="currentColor" d="M10,4V8H14V4H10M16,4V8H20V4H16M16,10V14H20V10H16M16,16V20H20V16H16M14,20V16H10V20H14M8,20V16H4V20H8M8,14V10H4V14H8M8,8V4H4V8H8M10,14H14V10H10V14M4,2H20A2,2 0 0,1 22,4V20A2,2 0 0,1 20,22H4C2.92,22 2,21.1 2,20V4A2,2 0 0,1 4,2Z" />
+							</svg>
+						</div>
+						<div class="controlbutton" id="ui-dockside">
+							<svg viewBox="0 0 24 24" id="ui-docklefticon">
+							    <path fill="currentColor" d="M20 4H4A2 2 0 0 0 2 6V18A2 2 0 0 0 4 20H20A2 2 0 0 0 22 18V6A2 2 0 0 0 20 4M20 18H9V6H20Z" />
+							</svg>
+							<svg class="hidden" id="ui-dockrighticon" viewBox="0 0 24 24">
+							    <path fill="currentColor" d="M20 4H4A2 2 0 0 0 2 6V18A2 2 0 0 0 4 20H20A2 2 0 0 0 22 18V6A2 2 0 0 0 20 4M15 18H4V6H15Z" />
+							</svg>
+						</div>
+					</div>
+				</div>
+				<div class="controlsection hidden">
+					<div class="topcontrolcontent">
 						<p class="smallheading">Selection</p>
 					</div>
 					<div class="bottomcontrolcontent">
@@ -236,7 +256,7 @@
 						</div>
 					</div>
 				</div>
-				<div class="controlsection">
+				<div class="controlsection hidden">
 					<div class="topcontrolcontent">
 						<p class="smallheading">Pan</p>
 					</div>
@@ -297,9 +317,9 @@
 			</div>
 		</div>
 		<div class="workspace"></div>
-		<script type="text/javascript" src="ui.js"></script>
 		<script type="text/javascript" src="logic.js"></script>
 		<script type="text/javascript" src="workspace.js"></script>
+		<script type="text/javascript" src="ui.js"></script>
 		<script type="text/javascript" src="tools.js"></script>
 	</body>
 </html>
