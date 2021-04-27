@@ -122,10 +122,9 @@
 			return (input1val && input2val);
 		});
 		gate.static = andgate.static;
-		gate.inputs[0].relativeX = -20 / 2;
-		gate.inputs[1].relativeX = -20 / 2;
-		gate.outputs[0].relativeX = 20 / 2;
-		// TODO: icon, input and output display offsets
+		gate.inputs[0].relativeX = -18 / 2;
+		gate.inputs[1].relativeX = -18 / 2;
+		gate.outputs[0].relativeX = 18.25 / 2;
 		return gate;
 	};
 
@@ -142,7 +141,9 @@
 			return (input1val || input2val);
 		});
 		gate.static = orgate.static;
-		// TODO: icon, input and output display offsets
+		gate.inputs[0].relativeX = -14.5 / 2;
+		gate.inputs[1].relativeX = -14.5 / 2;
+		gate.outputs[0].relativeX = 18.5 / 2;
 		return gate;
 	};
 
@@ -159,7 +160,9 @@
 			return ((input1val && !input2val) || (!input1val && input2val));
 		});
 		gate.static = xorgate.static;
-		// TODO: icon, input and output display offsets
+		gate.inputs[0].relativeX = -14.5 / 2;
+		gate.inputs[1].relativeX = -14.5 / 2;
+		gate.outputs[0].relativeX = 18.5 / 2;
 		return gate;
 	};
 
@@ -194,7 +197,8 @@
 			return true;
 		};
 		gate.static = notgate.static;
-		// TODO: icon, input and output display offsets
+		gate.inputs[0].relativeX = -18 / 2;
+		gate.outputs[0].relativeX = 20 / 2;
 		return gate;
 	};
 
@@ -211,7 +215,10 @@
 			return (!(input1val && input2val));
 		});
 		gate.static = nandgate.static;
-		// TODO: icon, input and output display offsets
+		gate.inputs[0].relativeX = -18 / 2;
+		gate.inputs[1].relativeX = -18 / 2;
+		gate.outputs[0].relativeX = 20 / 2;
+
 		return gate;
 	};
 
@@ -228,7 +235,9 @@
 			return (!(input1val || input2val));
 		});
 		gate.static = norgate.static;
-		// TODO: icon, input and output display offsets
+		gate.inputs[0].relativeX = -14.5 / 2;
+		gate.inputs[1].relativeX = -14.5 / 2;
+		gate.outputs[0].relativeX = 20 / 2;
 		return gate;
 	};
 
@@ -245,7 +254,9 @@
 			return (!((input1val && !input2val) || (!input1val && input2val)));
 		});
 		gate.static = xnorgate.static;
-		// TODO: icon, input and output display offsets
+		gate.inputs[0].relativeX = -14.5 / 2;
+		gate.inputs[1].relativeX = -14.5 / 2;
+		gate.outputs[0].relativeX = 20 / 2;
 		return gate;
 	};
 })();

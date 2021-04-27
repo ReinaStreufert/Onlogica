@@ -1,6 +1,9 @@
 (function() {
   let baseSize = 24;
-	let wireTension = 5;
+  let baseHangRadius = 1.5;
+	let baseTension = 25;
+  let baseStrokeWidth = 2;
+  let unfocusedAlpha = 0.5;
 
   window.workspace = {};
 
@@ -18,6 +21,7 @@
   workspace.userdefinedgraphs = [];
 	workspace.gridEnabled = false;
   let canvas = workspace.canvas;
+  let buffercanvas = workspace.buffercanvas;
   let ctx = canvas.getContext("2d");
 	let bufferctx = workspace.buffercanvas.getContext("2d");
 
@@ -61,13 +65,15 @@
       let object = workspace.currentgraph.objects[i];
       if (object.static.type = "gate") {
         let centerPoint = {};
-        if (workspace.onDisplay(object.x, object.y, baseSize * workspace.currentgraph.scale, baseSize * workspace.currentgraph.scale, centerPoint)) {
+        if (workspace.onDisplay(object.x, object.y, (baseSize + baseHangRadius) * workspace.currentgraph.scale, (baseSize + baseHangRadius) * workspace.currentgraph.scale, centerPoint)) {
           object.visible = true;
           let icon = object.static.icon;
-          let left = centerPoint.x - (baseSize * workspace.currentgraph.scale) / 2;
-          let top = centerPoint.y - (baseSize * workspace.currentgraph.scale) / 2;
+          let left = 0 - (baseSize * workspace.currentgraph.scale) / 2;
+          let top = 0 - (baseSize * workspace.currentgraph.scale) / 2;
           ctx.scale(workspace.currentgraph.scale, workspace.currentgraph.scale);
-          ctx.translate((left / workspace.currentgraph.scale) + 0.5, (top / workspace.currentgraph.scale) + 0.5);
+          ctx.translate((centerPoint.x / workspace.currentgraph.scale), (centerPoint.y / workspace.currentgraph.scale));
+          ctx.rotate(object.orientation * (Math.PI / 2));
+          ctx.translate((left / workspace.currentgraph.scale), (top / workspace.currentgraph.scale));
 
 					if (!hitTest) {
 						ctx.fillStyle = "#555555";
@@ -83,13 +89,123 @@
     }
 		for (let i = 0; i < workspace.currentgraph.objects.length; i++) {
 			let object = workspace.currentgraph.objects[i];
-			if (object.static.type == "gate" && object.visible) {
-				for (let ii = 0; ii < object.inputs.length; ii++) {
-					let input = object.inputs[ii];
-					if (!input.occupied) {
+			if (object.static.type == "gate") {
+        if (object.visible) {
+          ctx.shadowColor = "rgba(0,0,0,0.37)";
+          ctx.shadowBlur = 15;
+          for (let ii = 0; ii < object.inputs.length; ii++) {
+  					let input = object.inputs[ii];
+  					if (!input.occupied) {
+              let relativeX = input.relativeX;
+              let relativeY = input.relativeY;
+              if (object.orientation == 3) {
+                relativeX = input.relativeY;
+                relativeY = -input.relativeX;
+              } else if (object.orientation == 2) {
+                relativeX = -input.relativeX;
+                relativeY = -input.relativeY;
+              } else if (object.orientation == 1) {
+                relativeX = -input.relativeY;
+                relativeY = input.relativeX;
+              }
+              let displayPoint = workspace.graphPointToDisplayPoint(object.x + relativeX, object.y + relativeY);
+              ctx.fillStyle = "#FFFFFF";
+              //ctx.globalAlpha = 0.5;
+              ctx.beginPath();
+              ctx.ellipse(displayPoint.x, displayPoint.y, baseHangRadius * workspace.currentgraph.scale, baseHangRadius * workspace.currentgraph.scale, 0, 0, 2 * Math.PI);
+              if (!hitTest) {
+                ctx.fill();
+              } else if (ctx.isPointInPath(x, y)) {
+                hits.push({target: input, hitType: "input"});
+              }
+              //ctx.shadowBlur = 0;
+              //ctx.globalAlpha = 1;
+  					}
+  				}
+        }
+        for (let ii = 0; ii < object.outputs.length; ii++) {
+          let output = object.outputs[ii];
+          let relativeX = output.relativeX;
+          let relativeY = output.relativeY;
+          if (object.orientation == 3) {
+            relativeX = output.relativeY;
+            relativeY = -output.relativeX;
+          } else if (object.orientation == 2) {
+            relativeX = -output.relativeX;
+            relativeY = -output.relativeY;
+          } else if (object.orientation == 1) {
+            relativeX = -output.relativeY;
+            relativeY = output.relativeX;
+          }
 
-					}
-				}
+          let aDisplayPoint = workspace.graphPointToDisplayPoint(object.x + relativeX, object.y + relativeY);
+          //let renderMade = false;
+          ctx.shadowColor = "rgba(0,0,0,0.37)";
+          ctx.shadowBlur = 15;
+          for (let iii = 0; iii < output.destinations.length; iii++) {
+            let destination = output.destinations[iii];
+            relativeX = destination.relativeX;
+            relativeY = destination.relativeY;
+            if (destination.parent.orientation == 3) {
+              relativeX = destination.relativeY;
+              relativeY = -destination.relativeX;
+            } else if (destination.parent.orientation == 2) {
+              relativeX = -destination.relativeX;
+              relativeY = -destination.relativeY;
+            } else if (destination.parent.orientation == 1) {
+              relativeX = -destination.relativeY;
+              relativeY = destination.relativeX;
+            }
+            let bDisplayPoint = workspace.graphPointToDisplayPoint(destination.parent.x + relativeX, destination.parent.y + relativeY);
+            let curve = curveInterpolate(aDisplayPoint.x, aDisplayPoint.y, object.orientation, bDisplayPoint.x, bDisplayPoint.y, destination.parent.orientation);
+            if (curveVisible(curve)) {
+              /*if (!renderMade) {
+                bufferctx.clearRect(0, 0, buffercanvas.width, buffercanvas.height);
+                renderMade = true;
+              }*/
+              if (destination.values.length == 1) {
+                if (destination.values[0]) {
+                  ctx.strokeStyle = "#800080";
+                } else {
+                  ctx.strokeStyle = "#400040";
+                }
+              } else {
+                ctx.strokeStyle = "#CCCCCC";
+              }
+              ctx.lineWidth = baseStrokeWidth * workspace.currentgraph.scale;
+              ctx.beginPath();
+              ctx.moveTo(curve[0].x, curve[0].y);
+              ctx.bezierCurveTo(curve[1].x, curve[1].y, curve[2].x, curve[2].y, curve[3].x, curve[3].y);
+              if (!hitTest) {
+                ctx.globalAlpha = unfocusedAlpha;
+                ctx.stroke();
+                ctx.globalAlpha = 1;
+              } else if (ctx.isPointInStroke(x, y)) {
+                hits.push({target: output, destination: destination, hitType: "connection"});
+              }
+
+              ctx.fillStyle = "#FFFFFF";
+              ctx.beginPath();
+              ctx.ellipse(bDisplayPoint.x, bDisplayPoint.y, baseHangRadius * workspace.currentgraph.scale, baseHangRadius * workspace.currentgraph.scale, 0, 0, 2 * Math.PI);
+              if (!hitTest) {
+                ctx.fill();
+              } else if (ctx.isPointInPath(x, y)) {
+                hits.push({target: destination, hitType: "input"});
+              }
+            }
+          }
+          if (object.visible) {
+            ctx.fillStyle = "#FFFFFF";
+            ctx.beginPath();
+            ctx.ellipse(aDisplayPoint.x, aDisplayPoint.y, baseHangRadius * workspace.currentgraph.scale, baseHangRadius * workspace.currentgraph.scale, 0, 0, 2 * Math.PI);
+            if (!hitTest) {
+              ctx.fill();
+            } else if (ctx.isPointInPath(x, y)) {
+              hits.push({target: output, hitType: "output"});
+            }
+          }
+          ctx.shadowBlur = 0;
+        }
 			}
 		}
     if (!hitTest && workspace.animation != null) {
@@ -149,40 +265,45 @@
 	};
 
 	let curveInterpolate = function(x1, y1, o1, x2, y2, o2) { // orientation: 0 = inputs on left, outputs on right | 1 = inputs on top, outputs on bottom | 2 = inputs on right, outputs on left | 3 = inputs on bottom, outputs on top
-		let curve = [];
-		if (o1 == 0 && o2 == 0) {
-			let midpoint = (x1 + x2) / 2;
-			let min1 = x1 + wireTension * workspace.currentgraph.scale;
-			let min2 = x2 - wireTension * workspace.currentgraph.scale;
-			if (midpoint > min1) {
-				curve.push([{x: x1, y: y1}, {x: midpoint, y: y1}, {x: midpoint, y: y2}, {x: x2, y: y2}]);
-			} else {
-				let midpointy = (y1 + y2) / 2;
-				curve.push([{x: x1, y: y1}, {x: min1, y1}, {x: min1, y: midpointy}, {x: midpoint, y: midpointy}]);
-				curve.push([{x: midpoint, y: midpointy}, {x: min2, midpointy}, {x: min2, y: y2}, {x: x2, y: y2}]);
-			}
-		} else if (o1 == 0 && o2 = 1) {
-			let min1 = x1 + wireTension * workspace.currentgraph.scale;
-			let min2 = y2 - wireTension * workspace.currentgraph.scale;
-			if (x2 >= min1) {
-				if (min2 >= y1) {
-					curve.push([{x: x1, y: y1}, {x: x2, y: y1}, {x: x2, y: y2}]);
-				} else {
-					let midpointx = (x1 + x2) / 2;
-					let midpointy = (y1 + y2) / 2;
-					curve.push([{x: x1, y: y1}, {x: midpointx, y: y1}, {x: midpointx, y: midpointy}]);
-					curve.push([{x: midpointx, y: midpointy}, {x: midpointx, y: min2}, {x: x2, y: min2}, {x: x2, y: y2}]);
-				}
-			} else {
-				if (min2 >= y1) {
-					let midpointx = (x1 + x2) / 2;
-					let midpointy = (y1 + y2) / 2;
-					curve.push([{x: x1, y: y1}, {x: min1, y: y1}, {x: min1, y: midpointy}, {x: midpointx, y: midpointy}]);
-					curve.push([{x: midpointx, y: midpointy}, {x: x2, y: midpointy}, {x: x2, y: y2}]);
-				} else {
+    let tension = baseTension * workspace.currentgraph.scale;
+    let curve = [];
 
-				}
-			}
-		}
-	}
+    curve.push({x: x1, y: y1});
+
+    if (o1 == 0) {
+      curve.push({x: x1 + tension, y: y1});
+    } else if (o1 == 1) {
+      curve.push({x: x1, y: y1 + tension});
+    } else if (o1 == 2) {
+      curve.push({x: x1 - tension, y: y1});
+    } else if (o1 == 3) {
+      curve.push({x: x1, y: y1 - tension});
+    }
+
+    if (o2 == 0) {
+      curve.push({x: x2 - tension, y: y2});
+    } else if (o2 == 1) {
+      curve.push({x: x2, y: y2 - tension});
+    } else if (o2 == 2) {
+      curve.push({x: x2 + tension, y: y2});
+    } else if (o2 == 3) {
+      curve.push({x: x2, y: y2 + tension});
+    }
+
+    curve.push({x: x2, y: y2});
+
+    return curve;
+	};
+  let curveVisible = function(curve) {
+    if (curve[0].x > 0 && curve[0].y > 0 && curve[0].x < canvas.width && curve[0].y < canvas.height) {
+      return true;
+    }
+    if (curve[3].x > 0 && curve[3].y > 0 && curve[3].x < canvas.width && curve[3].y < canvas.height) {
+      return true;
+    }
+    if (bezierIntersect.cubicBezierAABB(curve[0].x, curve[0].y, curve[1].x, curve[1].y, curve[2].x, curve[2].y, curve[3].x, curve[3].y, 0, 0, canvas.width, canvas.height) > 0) {
+      return true;
+    }
+    return false;
+  }
 })();

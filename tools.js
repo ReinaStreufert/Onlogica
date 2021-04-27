@@ -55,15 +55,24 @@
 
   tools.select = {};
   let select = tools.select;
+  select.active = false;
+  select.mode = "";
   select.drag = function(startX, startY, x, y, graph) {
-    // TODO: all the selecty thingies idk shut up
+    if (!select.active) {
+      let hits = workspace.hitTest(x, y);
+      let lastHit = hits[hits.length - 1];
+      if (lastHit.hitType == "input") {
+        
+      }
+      select.active = true;
+    }
   };
   select.switch = function() {
     window.tools.currenttool = select;
     // TODO: again mfin controls
   };
   select.enddrag = function() {
-    // TODO: bruh kys
+    select.active = false;
   }
 
   window.tools.currenttool = tools.select;
